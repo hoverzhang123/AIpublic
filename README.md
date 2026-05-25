@@ -1,5 +1,7 @@
 # AIpublic
 
+This repo builds a RAG pipeline that loads a document knowledge base, encodes it into vectors with embeddings, stores those vectors in Milvus, and then uses an LLM to answer questions by retrieving relevant passages from that vector database.
+
 This project organizes the RAG example from `rag_milvus_deepseek_eng.ipynb` into a runnable Python application.
 
 ## Project Structure
