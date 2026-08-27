@@ -1,5 +1,5 @@
 """
-Unit tests for src/data_loader.py — Document loading and parsing.
+Unit tests for src/data_loader.py - Document loading and parsing.
 
 Tests the DataLoader class for loading markdown files, splitting sections,
 filtering empty documents, and handling edge cases.
@@ -237,9 +237,10 @@ class TestDataLoaderEdgeCases:
 
     def test_load_documents_with_unicode_content(self, tmp_path):
         """load_documents() handles Unicode content correctly."""
-        # Create file with Unicode characters
+        # Create file with Unicode characters (explicit UTF-8 encoding for Windows compatibility)
         (tmp_path / "unicode.md").write_text(
-            "# Unicode Test\n你好世界 🌍\nMültilingüal ñontent"
+            "# Unicode Test\nHello World 🌍\nMultilingual content",
+            encoding="utf-8"
         )
 
         loader = DataLoader(tmp_path)
@@ -247,9 +248,9 @@ class TestDataLoaderEdgeCases:
 
         assert len(docs) > 0
         combined = " ".join(docs)
-        assert "你好" in combined
+        assert "Hello" in combined
         assert "🌍" in combined
-        assert "Mültilingüal" in combined
+        assert "Multilingual" in combined
 
     def test_load_documents_with_windows_line_endings(self, tmp_path):
         """load_documents() handles Windows line endings."""

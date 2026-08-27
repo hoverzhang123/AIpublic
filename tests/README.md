@@ -11,5 +11,3 @@ pytest --cov=src tests/
 
 # Run a single test file
 pytest tests/test_config.py -v
-
-Over 350 tests, execution time under 10 seconds—fully ready to go!

@@ -1,5 +1,5 @@
 """
-Unit tests for src/milvus_store.py — Milvus vector database operations.
+Unit tests for src/milvus_store.py - Milvus vector database operations.
 
 Tests MilvusStore wrapper for collection lifecycle and vector operations.
 Uses mocking to avoid Docker/Milvus dependencies.

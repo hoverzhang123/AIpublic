@@ -26,7 +26,7 @@ def configure_logging(level: str) -> None:
     logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
 
 
-def build_collection(config: Config, embedder: Embedder, : bool = False) -> MilvusStore:
+def build_collection(config: Config, embedder: Embedder, force_rebuild: bool = False) -> MilvusStore:
     """
     Load documents, generate embeddings, and populate Milvus collection.
 

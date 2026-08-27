@@ -25,6 +25,8 @@ conda activate myenv
 pip install -r requirements.txt
 docker-compose -f src/milvus-docker/docker-compose.yml up -d
 pip install -U sentence-transformers
+
+docker-compose -f src/milvus-docker/docker-compose.yml down
 ```
 
 2. Set environment variables:
@@ -50,6 +52,68 @@ python -m src.main --question "How is data stored in milvus?" --rebuild
 ```bash
 python -m src.main --log-level CRITICAL --question "How is data stored in milvus?"
 ```
+
+## Automated Pipeline Script (Windows)
+
+`run_rag_pipeline.ps1` automates the full startup sequence on Windows: it launches Docker Desktop if it isn't running, starts the Milvus containers, waits for Milvus to become healthy, then runs the RAG query using the `myenv` conda environment.
+
+**Prerequisites:** Docker Desktop installed, and a conda environment named `myenv` with dependencies installed (see Quick Start above).
+
+**Basic usage:**
+
+```powershell
+.\run_rag_pipeline.ps1
+```
+
+This runs with the default question (`"How is data stored in milvus?"`), a 30-second Docker startup timeout, and a 60-second Milvus health-check timeout.
+
+**Custom question:**
+
+```powershell
+.\run_rag_pipeline.ps1 -Question "What is vector indexing?"
+```
+
+**Custom timeouts** (in seconds), useful if Docker Desktop or Milvus is slow to start on your machine:
+
+```powershell
+.\run_rag_pipeline.ps1 -DockerTimeout 45 -MilvusTimeout 90
+```
+
+**Stop the containers when you're done:**
+
+```powershell
+.\run_rag_pipeline.ps1 -Stop
+```
+
+This runs `docker compose down` on the Milvus stack (stops and removes the `etcd`, `minio`, and `milvus-standalone` containers) and exits, skipping the rest of the pipeline.
+
+**Stop containers and quit Docker Desktop itself:**
+
+```powershell
+.\run_rag_pipeline.ps1 -Stop -StopDockerDesktop
+```
+
+This additionally force-stops the Docker Desktop application after the containers are torn down.
+
+**Parameters:**
+
+| Parameter | Default | Description |
+|---|---|---|
+| `-Question` | `"How is data stored in milvus?"` | The query text passed to the RAG pipeline |
+| `-DockerTimeout` | `30` | Seconds to wait for the Docker daemon to become ready |
+| `-MilvusTimeout` | `60` | Seconds to wait for the Milvus health endpoint to return healthy |
+| `-Stop` | (switch, off) | Stop and remove the Milvus containers instead of starting the pipeline |
+| `-StopDockerDesktop` | (switch, off) | Combined with `-Stop`, also force-stops the Docker Desktop application |
+
+**What it does, step by step:**
+
+1. Checks if the Docker daemon is already running (`docker ps`); if not, launches Docker Desktop and waits for it to come up
+2. Runs `docker compose -f src/milvus-docker/docker-compose.yml up -d` to start the `etcd`, `minio`, and `milvus-standalone` containers
+3. Polls `http://localhost:9091/healthz` until Milvus reports healthy
+4. Resolves the `myenv` conda environment's `python.exe` directly (bypassing `conda run`, which can buffer/swallow output on Windows) and runs `python -m src.main --log-level CRITICAL --question "<your question>"`
+5. Prints the RAG answer to the console
+
+If any step fails (Docker never becomes ready, Milvus never becomes healthy, or the Python pipeline exits non-zero), the script prints a clear error and exits with a non-zero exit code.
 
 ## Description
 

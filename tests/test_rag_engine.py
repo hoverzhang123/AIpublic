@@ -1,5 +1,5 @@
 """
-Unit tests for src/rag_engine.py — RAG pipeline orchestration.
+Unit tests for src/rag_engine.py - RAG pipeline orchestration.
 
 Tests the RagEngine class for prompt building, LLM generation, and
 orchestration of the full RAG query pipeline. Uses mocking to avoid

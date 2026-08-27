@@ -74,9 +74,12 @@ class DataLoader:
         Split Markdown text into sections at Level 1 heading boundaries.
 
         Parses a single Markdown document and splits it into sections at each
-        "# " (Level 1 heading). Each section contains the heading and its associated
-        body content. This enables fine-grained retrieval where each heading+content
-        block can be indexed and retrieved independently.
+        "# " (Level 1 heading, not "## ", "### ", etc.). Each section contains the heading
+        and its associated body content. This enables fine-grained retrieval where each
+        heading+content block can be indexed and retrieved independently.
+
+        Respects code block boundaries (lines between triple backticks) and does not split
+        on "# " that appears inside code blocks or as part of higher-level headings (##, ###, etc.).
 
         Args:
             text (str): Raw Markdown text content from a single file.
@@ -92,22 +95,37 @@ class DataLoader:
             >>> len(sections)  # 2
             >>> sections[0]  # "Section A\\nContent A"
         """
-        if "# " not in text:
-            return [text]
-
+        lines = text.split("\n")
         sections: List[str] = []
-        parts = text.split("# ")
+        current_section: List[str] = []
+        in_code_block = False
 
-        for index, part in enumerate(parts):
-            if index == 0:
-                if part.strip():
-                    sections.append(part.strip())
+        for line in lines:
+            # Toggle code block state on triple backticks
+            if line.strip().startswith("```"):
+                in_code_block = not in_code_block
+                current_section.append(line)
                 continue
 
-            lines = part.splitlines()
-            heading = lines[0].strip()
-            body = "\n".join(lines[1:]).strip()
-            section_text = heading if not body else f"{heading}\n{body}"
-            sections.append(section_text.strip())
+            # Only split on "# " at line start if not in code block and it's a level-1 heading
+            if not in_code_block and line.startswith("# ") and not line.startswith("## "):
+                # Save current section if it has content
+                if current_section:
+                    section_text = "\n".join(current_section).strip()
+                    if section_text:
+                        sections.append(section_text)
+                    current_section = []
 
-        return sections
+                # Start new section with this heading (strip "# " prefix)
+                heading = line[2:].strip()  # Remove "# " prefix
+                current_section.append(heading)
+            else:
+                current_section.append(line)
+
+        # Add final section
+        if current_section:
+            section_text = "\n".join(current_section).strip()
+            if section_text:
+                sections.append(section_text)
+
+        return sections if sections else [text]

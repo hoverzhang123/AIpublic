@@ -1,5 +1,5 @@
 """
-Unit tests for src/config.py — Configuration management.
+Unit tests for src/config.py - Configuration management.
 
 Tests the Config dataclass initialization, environment variable reading,
 validation logic, and immutability.
@@ -23,6 +23,10 @@ class TestConfigInitialization:
         faq_dir.mkdir()
         (faq_dir / "test.md").write_text("# Test")
 
+        # Clear env vars that would override defaults
+        monkeypatch.delenv("LLM_BASE_URL", raising=False)
+        monkeypatch.delenv("LOCAL_API_KEY", raising=False)
+
         # Set minimal required env vars
         monkeypatch.setenv("OPENAI_API_KEY", "sk-test-key")
         monkeypatch.setenv("MILVUS_DOCS_PATH", str(faq_dir))
@@ -45,6 +49,9 @@ class TestConfigInitialization:
         faq_dir = tmp_path / "faq"
         faq_dir.mkdir()
         (faq_dir / "test.md").write_text("# Test")
+
+        # Clear LOCAL_API_KEY since it takes priority over OPENAI_API_KEY
+        monkeypatch.delenv("LOCAL_API_KEY", raising=False)
 
         # Set custom env vars
         monkeypatch.setenv("MILVUS_URI", "http://custom-milvus:19530")
