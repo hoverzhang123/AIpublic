@@ -68,7 +68,7 @@ class RagEngine:
 Human: You are an AI assistant. You can find the answer to the question from the provided context paragraphs.
 """
         user_prompt = f"""
-Please use the information fragments enclosed in <context> tags below to answer the question enclosed in <question> tags.
+Please use the information fragments enclosed in <context> tags below to answer the question enclosed in <question> tags. Finally include the original answer's Chinese translation and mark it with <translated> and </translated> tags
 <context>
 {context}
 </context>

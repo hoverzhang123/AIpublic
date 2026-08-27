@@ -4,6 +4,109 @@ This repo builds a RAG pipeline that loads a document knowledge base, encodes it
 
 This project organizes the RAG example from `rag_milvus_deepseek_eng.ipynb` into a runnable Python application.
 
+## System Architecture
+
+### Data Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     INDEXING PHASE (One-time)                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Markdown Docs          Embeddings            Vector Database    │
+│  (src/milvus_docs)         ↓                                     │
+│        ↓          ┌──────────────────┐        ┌──────────────┐  │
+│   DataLoader ──→  │   Embedder       │   →    │   Milvus     │  │
+│   (load & split)  │ (all-MiniLM-L6)  │        │  Collection  │  │
+│                   └──────────────────┘        └──────────────┘  │
+│                        384-dim vectors               (Docker)   │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                     QUERY/INFERENCE PHASE                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  User Question       Vector Search       Retrieved Context       │
+│        ↓                   ↓                      ↓              │
+│   "How is data  →  Encode query    →  Search Milvus   →  Top-3 │
+│    stored?"        (384 dims)       (similarity match)   chunks  │
+│                                                                   │
+│                                                                   │
+│  Context + Question    System Prompt        LLM Response         │
+│        ↓                     ↓                    ↓              │
+│   Build Prompt    →   GPT + Context    →   Generate Answer      │
+│   (RagEngine)         (DeepSeek/OpenAI)     (grounded reply)     │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Component Interaction
+
+```
+                        ┌─────────────────┐
+                        │   main.py       │
+                        │   (Orchestrator)│
+                        └────────┬────────┘
+                                 │
+                 ┌───────────────┼───────────────┐
+                 ↓               ↓               ↓
+          ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+          │ DataLoader   │ │  Embedder    │ │ MilvusStore  │
+          │              │ │              │ │              │
+          │ • load_docs  │ │ • encode_docs│ │ • create_coll│
+          │ • split_md   │ │ • encode_q   │ │ • insert     │
+          └──────────────┘ └──────────────┘ │ • search     │
+                                             └──────────────┘
+                                                    ↓
+                                            ┌────────────────┐
+                                            │  Milvus        │
+                                            │  (Vector DB)   │
+                                            │                │
+                                            │ • Collections  │
+                                            │ • Vectors      │
+                                            │ • Metadata     │
+                                            └────────────────┘
+                 │
+                 └──────────────┬──────────────┐
+                                ↓              ↓
+                         ┌──────────────┐ ┌──────────────┐
+                         │ RagEngine    │ │  Config      │
+                         │              │ │              │
+                         │ • build_prmt │ │ • env vars   │
+                         │ • gen_response
+                         │              │ │ • defaults   │
+                         └──────────────┘ └──────────────┘
+                                ↓
+                         ┌──────────────┐
+                         │ OpenAI Client│
+                         │              │
+                         │ • Chat API   │
+                         │ • LLM call   │
+                         └──────────────┘
+                                ↓
+                         ┌──────────────┐
+                         │ LLM Response │
+                         │              │
+                         │ Answer text  │
+                         └──────────────┘
+```
+
+### Workflow Sequence
+
+**Indexing (First Run / --rebuild)**
+1. Load all `.md` files from `src/milvus_docs/en/faq` → split by heading
+2. Encode documents into 384-dim vectors using `sentence-transformers`
+3. Create Milvus collection with schema (`id`, `vector`, `text`, dynamic fields)
+4. Insert vectors + metadata into collection
+
+**Querying (Every Run)**
+1. Read configuration from env vars (API key, model, LLM endpoint, etc.)
+2. Encode user question into 384-dim vector
+3. Search Milvus for top-3 similar document chunks (using IP metric)
+4. Build prompt: system message + context chunks + question
+5. Call LLM (DeepSeek via OpenRouter or local endpoint)
+6. Return grounded answer to user
+
 ## Project Structure
 
 - `requirements.txt`: Python dependency list
@@ -70,7 +173,7 @@ This runs with the default question (`"How is data stored in milvus?"`), a 30-se
 **Custom question:**
 
 ```powershell
-.\run_rag_pipeline.ps1 -Question "What is vector indexing?"
+.\run_rag_pipeline.ps1 -Question "How is data stored in milvus?"
 ```
 
 **Custom timeouts** (in seconds), useful if Docker Desktop or Milvus is slow to start on your machine:
