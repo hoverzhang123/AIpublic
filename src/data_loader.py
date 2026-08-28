@@ -13,6 +13,7 @@ class DataLoader:
 
     Used by the RAG pipeline to load the FAQ knowledge base before generating embeddings.
     """
+
     def __init__(self, source_directory: Path):
         """
         Initialize the DataLoader with a source directory path.
@@ -108,7 +109,11 @@ class DataLoader:
                 continue
 
             # Only split on "# " at line start if not in code block and it's a level-1 heading
-            if not in_code_block and line.startswith("# ") and not line.startswith("## "):
+            if (
+                not in_code_block
+                and line.startswith("# ")
+                and not line.startswith("## ")
+            ):
                 # Save current section if it has content
                 if current_section:
                     section_text = "\n".join(current_section).strip()

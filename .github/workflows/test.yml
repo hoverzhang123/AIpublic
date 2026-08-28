@@ -30,15 +30,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov pytest-mock
+        pip install -r requirements-dev.txt
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
-        pytest tests/ -v --tb=short
-
-    - name: Generate coverage report
-      run: |
-        pytest --cov=src --cov-report=xml --cov-report=term-missing tests/
+        pytest tests/ -v --tb=short --cov=src --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -66,10 +62,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install black ruff isort mypy
+        pip install -r requirements-dev.txt
 
     - name: Check code formatting with Black
-      run: black --check src/ tests/ || echo "Run: black src/ tests/"
+      run: 'black --check src/ tests/ || echo "Run: black src/ tests/"'
       continue-on-error: true
 
     - name: Lint with Ruff
@@ -98,7 +94,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install mypy types-requests
+        pip install -r requirements-dev.txt
 
     - name: Type check with mypy
       run: mypy src/ --ignore-missing-imports

@@ -5,7 +5,6 @@ Tests the Config dataclass initialization, environment variable reading,
 validation logic, and immutability.
 """
 
-import os
 from pathlib import Path
 
 import pytest
@@ -136,10 +135,14 @@ class TestConfigValidation:
 
         config = Config()
 
-        with pytest.raises(FileNotFoundError, match="FAQ source directory does not exist"):
+        with pytest.raises(
+            FileNotFoundError, match="FAQ source directory does not exist"
+        ):
             config.validate()
 
-    def test_validate_raises_when_faq_path_is_not_directory(self, tmp_path, monkeypatch):
+    def test_validate_raises_when_faq_path_is_not_directory(
+        self, tmp_path, monkeypatch
+    ):
         """validate() raises FileNotFoundError when FAQ path is a file, not a directory."""
         # Create a file instead of directory
         faq_file = tmp_path / "faq.txt"
@@ -150,7 +153,9 @@ class TestConfigValidation:
 
         config = Config()
 
-        with pytest.raises(FileNotFoundError, match="FAQ source directory does not exist"):
+        with pytest.raises(
+            FileNotFoundError, match="FAQ source directory does not exist"
+        ):
             config.validate()
 
 
@@ -161,7 +166,9 @@ class TestConfigImmutability:
         """Config is frozen and cannot be modified after creation."""
         config = sample_config
 
-        with pytest.raises(Exception):  # frozen dataclass raises dataclass.FrozenInstanceError
+        with pytest.raises(
+            Exception
+        ):  # frozen dataclass raises dataclass.FrozenInstanceError
             config.collection_name = "different_name"
 
     def test_config_frozen_prevents_new_attributes(self, sample_config):

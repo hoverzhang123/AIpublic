@@ -15,6 +15,7 @@ class Embedder:
     search during query time. This component is initialized once at pipeline startup
     and shared across document indexing and query processing.
     """
+
     def __init__(self) -> None:
         """
         Initialize the Embedder by loading the pre-trained sentence-transformers model.

@@ -108,7 +108,9 @@ def mock_openai_response():
     mock_response = Mock()
     mock_response.choices = [Mock()]
     mock_response.choices[0].message = Mock()
-    mock_response.choices[0].message.content = "This is the LLM-generated answer based on the context provided."
+    mock_response.choices[0].message.content = (
+        "This is the LLM-generated answer based on the context provided."
+    )
     return mock_response
 
 
@@ -127,7 +129,9 @@ def mock_embedder():
     """Mock Embedder for testing without loading sentence-transformers model."""
     mock = Mock()
     # Return vectors of correct dimension (384)
-    mock.encode_documents.return_value = [[0.1 * i for i in range(384)] for _ in range(3)]
+    mock.encode_documents.return_value = [
+        [0.1 * i for i in range(384)] for _ in range(3)
+    ]
     mock.encode_queries.return_value = [[0.1 * i for i in range(384)]]
     return mock
 
@@ -170,7 +174,13 @@ def sample_config(tmp_path):
     yield config
 
     # Cleanup
-    for key in ["OPENAI_API_KEY", "MILVUS_URI", "MILVUS_COLLECTION", "MILVUS_DOCS_PATH", "MAX_RETRIEVALS"]:
+    for key in [
+        "OPENAI_API_KEY",
+        "MILVUS_URI",
+        "MILVUS_COLLECTION",
+        "MILVUS_DOCS_PATH",
+        "MAX_RETRIEVALS",
+    ]:
         os.environ.pop(key, None)
 
 
@@ -186,7 +196,9 @@ def temp_markdown_dir(tmp_path):
     sub_dir.mkdir()
 
     # Create markdown files
-    (main_dir / "file1.md").write_text("# Document 1\nContent 1\n# Document 2\nContent 2")
+    (main_dir / "file1.md").write_text(
+        "# Document 1\nContent 1\n# Document 2\nContent 2"
+    )
     (sub_dir / "file2.md").write_text("# SubDoc A\nSubcontent A")
     (main_dir / "empty.md").write_text("")
 

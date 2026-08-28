@@ -14,6 +14,7 @@ class MilvusStore:
     The MilvusStore is initialized once at pipeline startup and shared by the
     build_collection and RagEngine components for indexing and retrieval.
     """
+
     def __init__(self, uri: str, collection_name: str) -> None:
         """
         Initialize the Milvus client connection.

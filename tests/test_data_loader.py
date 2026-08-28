@@ -149,7 +149,9 @@ class TestSplitMarkdownSections:
         assert len(result) == 1
         assert result[0] == sample_markdown_single_section
 
-    def test_split_markdown_with_multiple_headings(self, sample_markdown_multiple_sections):
+    def test_split_markdown_with_multiple_headings(
+        self, sample_markdown_multiple_sections
+    ):
         """_split_markdown_sections() splits at level-1 headings."""
         result = DataLoader._split_markdown_sections(sample_markdown_multiple_sections)
 
@@ -159,7 +161,9 @@ class TestSplitMarkdownSections:
         assert any("Section 2" in s for s in result)
         assert any("Section 3" in s for s in result)
 
-    def test_split_markdown_preserves_heading_and_body(self, sample_markdown_multiple_sections):
+    def test_split_markdown_preserves_heading_and_body(
+        self, sample_markdown_multiple_sections
+    ):
         """_split_markdown_sections() preserves heading + body structure."""
         result = DataLoader._split_markdown_sections(sample_markdown_multiple_sections)
 
@@ -239,8 +243,7 @@ class TestDataLoaderEdgeCases:
         """load_documents() handles Unicode content correctly."""
         # Create file with Unicode characters (explicit UTF-8 encoding for Windows compatibility)
         (tmp_path / "unicode.md").write_text(
-            "# Unicode Test\nHello World 🌍\nMultilingual content",
-            encoding="utf-8"
+            "# Unicode Test\nHello World 🌍\nMultilingual content", encoding="utf-8"
         )
 
         loader = DataLoader(tmp_path)
@@ -256,8 +259,7 @@ class TestDataLoaderEdgeCases:
         """load_documents() handles Windows line endings."""
         # Use \r\n line endings
         (tmp_path / "windows.md").write_text(
-            "# Heading 1\r\nContent 1\r\n# Heading 2\r\nContent 2",
-            newline=""
+            "# Heading 1\r\nContent 1\r\n# Heading 2\r\nContent 2", newline=""
         )
 
         loader = DataLoader(tmp_path)
@@ -297,9 +299,7 @@ Content."""
 
     def test_load_documents_returns_stripped_sections(self, tmp_path):
         """load_documents() returns stripped sections without extra whitespace."""
-        (tmp_path / "test.md").write_text(
-            "\n\n# Heading\n\nContent\n\n"
-        )
+        (tmp_path / "test.md").write_text("\n\n# Heading\n\nContent\n\n")
 
         loader = DataLoader(tmp_path)
         docs = loader.load_documents()

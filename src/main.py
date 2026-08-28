@@ -26,7 +26,9 @@ def configure_logging(level: str) -> None:
     logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
 
 
-def build_collection(config: Config, embedder: Embedder, force_rebuild: bool = False) -> MilvusStore:
+def build_collection(
+    config: Config, embedder: Embedder, force_rebuild: bool = False
+) -> MilvusStore:
     """
     Load documents, generate embeddings, and populate Milvus collection.
 
@@ -165,7 +167,9 @@ def main() -> None:
     configure_logging(log_level)
 
     embedder = Embedder()
-    store = build_collection(config=config, embedder=embedder, force_rebuild=args.rebuild)
+    store = build_collection(
+        config=config, embedder=embedder, force_rebuild=args.rebuild
+    )
     engine = RagEngine(config=config, milvus_store=store, embedder=embedder)
 
     logging.info("Running RAG query: %s", args.question)

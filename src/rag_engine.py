@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, Optional
 
 from openai import OpenAI
 
@@ -18,7 +18,10 @@ class RagEngine:
     This is the main query-time component; it's initialized once at startup and called for
     each user question.
     """
-    def __init__(self, config: Config, milvus_store: MilvusStore, embedder: Embedder) -> None:
+
+    def __init__(
+        self, config: Config, milvus_store: MilvusStore, embedder: Embedder
+    ) -> None:
         """
         Initialize the RAG engine with dependencies.
 
@@ -78,7 +81,7 @@ Please use the information fragments enclosed in <context> tags below to answer 
 """
         return {"system": system_prompt, "user": user_prompt}
 
-    def _generate_response(self, system_prompt: str, user_prompt: str) -> str:
+    def _generate_response(self, system_prompt: str, user_prompt: str) -> Optional[str]:
         """
         Call the LLM to generate an answer based on system and user prompts.
 
@@ -90,7 +93,9 @@ Please use the information fragments enclosed in <context> tags below to answer 
             user_prompt (str): User message containing context and question.
 
         Returns:
-            str: The LLM-generated answer text extracted from the response.
+            Optional[str]: The LLM-generated answer text extracted from the response,
+                          or None if the LLM returned no content (e.g. a tool-call-only
+                          response or content filtering).
 
         Raises:
             Possible exceptions from OpenAI client library (APIError, AuthenticationError, etc.)
@@ -130,7 +135,8 @@ Please use the information fragments enclosed in <context> tags below to answer 
             str: The LLM-generated answer grounded in retrieved context.
 
         Raises:
-            RuntimeError: If no similar documents are found in Milvus for the query.
+            RuntimeError: If no similar documents are found in Milvus for the query,
+                or if the LLM returns no content.
             Possible exceptions from LLM API calls (see _generate_response).
 
         Example:
@@ -150,6 +156,11 @@ Please use the information fragments enclosed in <context> tags below to answer 
 
         context = "\n".join(match["text"] for match in matches)
         prompts = self._build_prompt(context=context, question=question)
-        return self._generate_response(
+        answer = self._generate_response(
             system_prompt=prompts["system"], user_prompt=prompts["user"]
         )
+
+        if answer is None:
+            raise RuntimeError("LLM returned no content.")
+
+        return answer

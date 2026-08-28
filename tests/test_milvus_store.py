@@ -5,7 +5,7 @@ Tests MilvusStore wrapper for collection lifecycle and vector operations.
 Uses mocking to avoid Docker/Milvus dependencies.
 """
 
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, patch
 
 import pytest
 
