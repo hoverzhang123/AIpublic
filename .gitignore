@@ -4,3 +4,7 @@ __pycache__/
 .vscode
 *.env
 *.log
+src/milvus-docker/volumes/
+.coverage
+SETUP_GUIDE_CN.md
+coverage.xml
