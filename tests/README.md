@@ -9,5 +9,8 @@ pytest tests/ -v
 # Check coverage
 pytest --cov=src tests/
 
+# check python format
+black --check src/ tests/ 
+
 # Run a single test file
 pytest tests/test_config.py -v

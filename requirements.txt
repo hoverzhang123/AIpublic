@@ -6,7 +6,7 @@ cachetools==7.1.4
 certifi==2026.5.20
 charset-normalizer==3.4.7
 click==8.4.1
-colorama==0.4.6
+colorama==0.4.6; sys_platform == 'win32'
 coloredlogs==15.0.1
 comm==0.2.3
 debugpy==1.8.20
@@ -61,11 +61,11 @@ pydantic_core==2.46.4
 Pygments==2.20.0
 pymilvus==2.5.10
 pymilvus.model==0.3.2
-pyreadline3==3.5.6
+pyreadline3==3.5.6; sys_platform == 'win32'
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 pytz==2026.2
-pywin32==311
+pywin32==311; sys_platform == 'win32'
 PyYAML==6.0.3
 pyzmq==27.1.0
 regex==2026.5.9
